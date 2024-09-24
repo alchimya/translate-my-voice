@@ -1,10 +1,4 @@
-import React, { useRef, useState } from "react";
-/*
-import {
-  StartStreamTranscriptionCommand,
-  AudioStream,
-} from "@aws-sdk/client-transcribe-streaming";
- */
+import React, { useEffect, useRef, useState } from "react";
 import { VoiceId } from "@aws-sdk/client-polly";
 import { Button, Select, Typography, Spin } from "antd";
 
@@ -16,38 +10,61 @@ import { AwsPolly } from "./AwsPolly";
 const { Option } = Select;
 const { Title, Paragraph } = Typography;
 
-const REGION = "eu-west-1"; // Set your AWS region
+const REGION = "eu-west-1";
 const IDENTITY_POOL_ID = "eu-west-1:d7204e8f-bf1a-4725-9a15-ca563aeaa662";
 const INPUT_LANGUAGE_CODE_ID = "it-IT";
 const OUTPUT_LANGUAGE_CODE_ID = "en-EN";
-//const SAMPLE_RATE = 44100;
-
 
 const App: React.FC = () => {
+
   const [transcription, setTranscription] = useState<string>("");
   const [translation, setTranslation] = useState<string>("");
   const [voiceId, setVoiceId] = useState<VoiceId>("Joanna");
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
  
-  const polly = new AwsPolly({
-    region: REGION, 
-    identityPoolId: IDENTITY_POOL_ID,
-    voiceId: voiceId
-  });
+  const pollyeRef = useRef<AwsPolly | null>(null);
+  const translateRef = useRef<AwsTranslate | null>(null);
+  const transcribeRef = useRef<AwsTranscribe | null>(null);
+  
 
-  const translate = new AwsTranslate({
-    region: REGION, 
-    identityPoolId: IDENTITY_POOL_ID, 
-    inputLanguageId: INPUT_LANGUAGE_CODE_ID, 
-    outputLanguageId: OUTPUT_LANGUAGE_CODE_ID
-  });
 
-  const transcribe = new AwsTranscribe({
-    region: REGION, 
-    identityPoolId: IDENTITY_POOL_ID,
-    inputLanguageId: INPUT_LANGUAGE_CODE_ID
-  });
+  useEffect(() => {
+    const initializeTranscribe = async () => {
+      try {
+        
+        pollyeRef.current = new AwsPolly({
+          region: REGION, 
+          identityPoolId: IDENTITY_POOL_ID,
+          voiceId: voiceId
+        });
+        
+        translateRef.current = new AwsTranslate({
+          region: REGION, 
+          identityPoolId: IDENTITY_POOL_ID, 
+          inputLanguageId: INPUT_LANGUAGE_CODE_ID, 
+          outputLanguageId: OUTPUT_LANGUAGE_CODE_ID
+        });
+      
+        transcribeRef.current = new AwsTranscribe({
+          region: REGION,
+          identityPoolId: IDENTITY_POOL_ID,
+          inputLanguageId: INPUT_LANGUAGE_CODE_ID
+        });
+        
+      } catch (error) {
+        console.error('Failed to initialize AwsTranscribe:', error);
+        // Handle the error appropriately (e.g., show an error message to the user)
+      }
+    };
+
+    initializeTranscribe();
+
+  }, []); 
+
+
+  
+  
 
   // Start recording and transcription
   const startRecording = async () => {
@@ -57,7 +74,7 @@ const App: React.FC = () => {
     try {
 
 
-      await transcribe.startStreaming(async (transcript) => {
+      await transcribeRef.current?.startStreaming(async (transcript) => {
         if (transcript) {
           setTranscription((prev) => prev + " " + transcript);
           await invokePolly(transcript);
@@ -72,7 +89,7 @@ const App: React.FC = () => {
 
   const invokeTranslate = async (text: string): Promise<string> => {
     try {
-      return await translate.translate(text);
+      return await translateRef.current?.translate(text) || "";
     } catch (error) {
       console.error("Error during translation: ", error);
       return text; // Fallback to original text
@@ -83,7 +100,7 @@ const App: React.FC = () => {
     try {
       setLoading(true);
       const translatedText = await invokeTranslate(text); // Translate the text before passing to Polly
-      polly.speech(translatedText)
+      pollyeRef.current?.speech(translatedText)
       setTranslation((prev) => prev + " " + translatedText);
     } catch (error) {
       console.error("Error during Polly synthesis: ", error);
@@ -98,7 +115,7 @@ const App: React.FC = () => {
   const stopRecording =  () => {
     setTranscription("");
     setTranslation("");
-    transcribe.stopStreaming();
+    transcribeRef.current?.stopStreaming();
     setIsRecording(false);
   };
 

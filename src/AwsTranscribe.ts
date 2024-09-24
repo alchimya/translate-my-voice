@@ -3,12 +3,11 @@ import {
     StartStreamTranscriptionCommand,
     AudioStream,
   } from "@aws-sdk/client-transcribe-streaming";
-import { AwsClientConfig, AwsTranscribeClientConfig } from "./AwsClientConfig";
+import { AwsTranscribeClientConfig } from "./AwsClientConfig";
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-identity";
 import { AsyncAudioInputStream } from "./AsyncAudioInputStream";
 
 const SAMPLE_RATE = 44100;
-const audioInputStream = new AsyncAudioInputStream();
 
 export class AwsTranscribe {
     private config: AwsTranscribeClientConfig;
@@ -86,7 +85,6 @@ export class AwsTranscribe {
             transcripts?.forEach(async (result) => {
               if (!result.IsPartial && result.Alternatives && result.Alternatives.length > 0) {
                 alternativeTranscript = result.Alternatives[0]?.Transcript || "";
-                console.log(alternativeTranscript);
                 onTranscript(alternativeTranscript);
               }
             });
@@ -96,16 +94,16 @@ export class AwsTranscribe {
     };
   
     stopStreaming = () => {
+  
       if (this.processor) {
-        console.log("processor");
         this.processor.disconnect();
       }
+
       if (this.mediaStream) {
-        console.log("mediaStream");
         this.mediaStream.getTracks().forEach((track) => track.stop());
       }
+
       if (this.audioContext) {
-        console.log("audioContext");
         this.audioContext.close();
       }
     };
