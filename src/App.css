@@ -28,6 +28,16 @@
   color: #61dafb;
 }
 
+.paragraph-with-scrollbar {
+  height: 350px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: left;
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
