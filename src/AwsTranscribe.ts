@@ -2,15 +2,16 @@ import {
     TranscribeStreamingClient,
     StartStreamTranscriptionCommand,
     AudioStream,
+    LanguageCode,
   } from "@aws-sdk/client-transcribe-streaming";
-import { AwsTranscribeClientConfig } from "./AwsClientConfig";
+import { AwsClientConfig } from "./AwsClientConfig";
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-identity";
 import { AsyncAudioInputStream } from "./AsyncAudioInputStream";
 
 const SAMPLE_RATE = 44100;
 
 export class AwsTranscribe {
-    private config: AwsTranscribeClientConfig;
+    private config: AwsClientConfig;
     private mediaStream: MediaStream | undefined;
     private audioContext: AudioContext | undefined;
     private processor: ScriptProcessorNode | undefined;
@@ -18,7 +19,7 @@ export class AwsTranscribe {
 
     client: TranscribeStreamingClient;
 
-    constructor (config: AwsTranscribeClientConfig) {
+    constructor (config: AwsClientConfig) {
         this.config = config;
         this.client = new TranscribeStreamingClient({
             region: config.region,
@@ -40,7 +41,7 @@ export class AwsTranscribe {
       return buffer;
     };
 
-    startStreaming = async (onTranscript: (transcript: string) => void): Promise<void> => {
+    startStreaming = async (onTranscript: (transcript: string) => void, inputLanguageId: string): Promise<void> => {
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error("getUserMedia not supported on your browser");
@@ -68,7 +69,7 @@ export class AwsTranscribe {
       
       // Set up Transcribe command
       const command = new StartStreamTranscriptionCommand({
-        LanguageCode: this.config.inputLanguageId,
+        LanguageCode: inputLanguageId as LanguageCode,
         MediaSampleRateHertz: SAMPLE_RATE,
         MediaEncoding: "pcm",
         AudioStream: this.audioInputStream as AsyncIterable<AudioStream>

@@ -8,10 +8,9 @@ export class AsyncAudioInputStream implements AsyncIterable<AudioStream> {
       while (!this.closed || this.buffer.length > 0) {
         if (this.buffer.length > 0) {
           const chunk = this.buffer.shift() as Uint8Array;
-          // Wrap the Uint8Array into an object conforming to AudioStream
           yield { AudioEvent: { AudioChunk: chunk } };
         } else {
-          await new Promise((resolve) => setTimeout(resolve, 100)); // Simple backoff mechanism
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
       }
     }

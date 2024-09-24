@@ -1,11 +1,15 @@
-import { TranslateClient, TranslateTextCommand } from "@aws-sdk/client-translate";
-import { AwsTranslateClientConfig } from "./AwsClientConfig";
+import { 
+    TranslateClient, 
+    TranslateTextCommand 
+} from "@aws-sdk/client-translate";
+import { AwsClientConfig } from "./AwsClientConfig";
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-identity";
+
 export class AwsTranslate {
-    private config: AwsTranslateClientConfig;
+    private config: AwsClientConfig;
     client: TranslateClient;
 
-    constructor (config: AwsTranslateClientConfig) {
+    constructor (config: AwsClientConfig) {
         this.config = config;
         this.client = new TranslateClient({
             region: config.region,
@@ -17,11 +21,11 @@ export class AwsTranslate {
 
     }
 
-    translate = async (text: string): Promise<string> => {
+    translate = async (text: string, inputLanguageId: string, outputLanguageId: string): Promise<string> => {
         const command = new TranslateTextCommand({
             Text: text,
-            SourceLanguageCode: this.config.inputLanguageId || 'auto', 
-            TargetLanguageCode: this.config.outputLanguageId,
+            SourceLanguageCode: inputLanguageId || 'auto', 
+            TargetLanguageCode: outputLanguageId,
           });
       
           const response = await this.client.send(command);

@@ -1,12 +1,16 @@
-import { PollyClient, SynthesizeSpeechCommand, VoiceId } from "@aws-sdk/client-polly";
+import { 
+  PollyClient, 
+  SynthesizeSpeechCommand, 
+  VoiceId 
+} from "@aws-sdk/client-polly";
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-identity";
-import { AwsClientConfig, AwsPollyClientConfig } from "./AwsClientConfig";
+import { AwsClientConfig } from "./AwsClientConfig";
 
 export class AwsPolly {
     client: PollyClient;
-    config: AwsPollyClientConfig;
+    config: AwsClientConfig;
 
-    constructor (config: AwsPollyClientConfig) {
+    constructor (config: AwsClientConfig) {
         this.config = config;
         this.client = new PollyClient({
             region: config.region,
@@ -16,12 +20,12 @@ export class AwsPolly {
             }),
         });
     }
-    speech = async (text: string) => {
+    speech = async (text: string, voiceId: VoiceId) => {
       const command = new SynthesizeSpeechCommand({
-        OutputFormat: "mp3", // Use lowercase
+        OutputFormat: "mp3",
         Text: text,
         Engine: "neural",
-        VoiceId: this.config.voiceId as VoiceId
+        VoiceId: voiceId
       });
 
       const response = await this.client.send(command);
@@ -31,7 +35,7 @@ export class AwsPolly {
         const audioBlob = await this.streamToBlob(response.AudioStream);
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
-        audio.play(); // Play the audio
+        audio.play();
       }
     };
 
@@ -44,6 +48,6 @@ export class AwsPolly {
         chunks.push(result.value);
       }
     
-      return new Blob(chunks); // Convert chunks to Blob
+      return new Blob(chunks);
     };
 }
