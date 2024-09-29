@@ -16,8 +16,7 @@ export class AwsTranscribe {
     private audioContext: AudioContext | undefined;
     private processor: ScriptProcessorNode | undefined;
     private audioInputStream: AsyncAudioInputStream | undefined;
-
-    client: TranscribeStreamingClient;
+    private client: TranscribeStreamingClient;
 
     constructor (config: AwsClientConfig) {
         this.config = config;

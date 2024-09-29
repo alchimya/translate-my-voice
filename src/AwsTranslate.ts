@@ -7,7 +7,7 @@ import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-id
 
 export class AwsTranslate {
     private config: AwsClientConfig;
-    client: TranslateClient;
+    private client: TranslateClient;
 
     constructor (config: AwsClientConfig) {
         this.config = config;

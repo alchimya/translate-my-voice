@@ -34,9 +34,11 @@
   padding: 10px;
   border-radius: 4px;
   text-align: left;
-  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-y: auto;
+  overflow-x: hidden;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
-
 
 @keyframes App-logo-spin {
   from {

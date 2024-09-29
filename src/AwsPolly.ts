@@ -7,7 +7,7 @@ import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-id
 import { AwsClientConfig } from "./AwsClientConfig";
 
 export class AwsPolly {
-    client: PollyClient;
+    private client: PollyClient;
     config: AwsClientConfig;
 
     constructor (config: AwsClientConfig) {

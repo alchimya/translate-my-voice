@@ -14,7 +14,7 @@ import { AwsClientConfig } from "./AwsClientConfig";
 
 
 const { Option } = Select;
-const { Title, Paragraph } = Typography;
+const { Title } = Typography;
 
 const App: React.FC = () => {
   const defaultOutputLanguage = Languages.Italian;
